@@ -1,0 +1,9 @@
+# Python
+*.pyc
+__pycache__/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+results/
+pylint.txt

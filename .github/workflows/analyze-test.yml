@@ -1,0 +1,79 @@
+name: Analyze and test
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9.13", "3.10", "3.11", "3.12", "3.13", "3.14" ]
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m venv .venv
+        . .venv/bin/activate
+        python -m pip install --upgrade pip
+        python -m pip install paho-mqtt configobj mock pytest coverage
+        python -m pip install flake8 flake8-cognitive-complexity pylint
+        python -m pip install -r requirements.txt
+        # The module imports weewx lazily; pylint needs it importable.
+        python -m pip install 'weewx==5.5.2'
+        python -m pip list
+    - name: Lint with pylint
+      run: |
+        . .venv/bin/activate
+        mkdir -p results
+        pylint ./bin/user/mqttcommon.py -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" | tee results/pylint.txt
+        PYTHONPATH="bin:${PYTHONPATH}" \
+          pylint ./bin/user/tests -r n --rcfile .pylintrc-tests --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" | tee results/pylint-tests.txt
+    - name: Lint with flake8
+      run: |
+        . .venv/bin/activate
+        flake8 ./bin/user/mqttcommon.py | tee results/flake8.txt
+        flake8 ./bin/user/tests | tee results/flake8-tests.txt
+    - name: Tests and coverage
+      run: |
+        . .venv/bin/activate
+        PYTHONPATH="bin:${PYTHONPATH}" coverage run --branch -m pytest bin/user/tests/unit
+        coverage report --include 'bin/user/*.py' --omit bin/user/__init__.py
+
+  # The module supports the paho-mqtt v1 api as well as v2, so it is tested
+  # against both. pylint cannot validate the v2 code paths against 1.6.1
+  # (E1101/E1123 are false positives), so lint findings are reported only.
+  analyze-test-paho-mqtt-1-6-1:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+    - name: Install dependencies
+      run: |
+        python -m venv .venv
+        . .venv/bin/activate
+        python -m pip install --upgrade pip
+        python -m pip install 'paho-mqtt==1.6.1' configobj mock pytest coverage
+        python -m pip install flake8 flake8-cognitive-complexity pylint
+        python -m pip install -r requirements.txt
+        python -m pip install 'weewx==5.5.2'
+    - name: Lint with pylint
+      continue-on-error: true
+      run: |
+        . .venv/bin/activate
+        pylint ./bin/user/mqttcommon.py -r n
+    - name: Tests
+      run: |
+        . .venv/bin/activate
+        PYTHONPATH="bin:${PYTHONPATH}" pytest bin/user/tests/unit
