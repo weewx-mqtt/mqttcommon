@@ -1,0 +1,10 @@
+name: Run versioning workflow
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  version:
+    uses: ./.github/workflows/versioning.yml

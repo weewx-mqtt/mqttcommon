@@ -21,7 +21,7 @@ mqttcommon.sh --check   # report the ones that differ
 `mqttcommon.sh` lives in
 [development-tools](https://github.com/weewx-extensions/development-tools/tree/master/tools) and
 resolves this repository as its sibling (`MQTTCOMMON_SRC` overrides the path). The analyze-test
-workflow compares the extension's copies against `common-ref` (default `master`), so a stale copy
+workflow compares the extension's copies against `common-ref` (default `v1`), so a stale copy
 fails the build.
 
 ## MQTTCOMMON_API
