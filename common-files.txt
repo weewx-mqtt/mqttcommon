@@ -1,0 +1,4 @@
+# The files this repository expects its consumers to copy in, one path per line.
+# development-tools reads this at the ref the consumer declares.
+bin/user/mqttcommon.py
+bin/user/tests/unit/test_mqttcommon.py
