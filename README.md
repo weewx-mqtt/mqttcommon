@@ -14,13 +14,13 @@ extensions write the same `bin/user/mqttcommon.py` on a station.
 Do not edit the copy in an extension. Change the file here and pull it in:
 
 ```bash
-mqttcommon.sh           # copy bin/user/mqttcommon.py and its tests in
-mqttcommon.sh --check   # report the ones that differ
+commonrepos.sh           # copy bin/user/mqttcommon.py and its tests in
+commonrepos.sh --check   # report the ones that differ
 ```
 
-`mqttcommon.sh` lives in
+`commonrepos.sh` lives in
 [development-tools](https://github.com/weewx-extensions/development-tools/tree/master/tools) and
-resolves this repository as its sibling (`MQTTCOMMON_SRC` overrides the path). The analyze-test
+resolves this repository as its sibling (`WEEWX_COMMON_SRC` overrides the path). The analyze-test
 workflow compares the extension's copies against `common-ref` (default `v1`), so a stale copy
 fails the build.
 
