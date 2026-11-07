@@ -79,7 +79,7 @@ flake8 ./bin/user/mqttcommon.py ./bin/user/tests
 ~/weewx_dev/weewx-extensions/development-tools/tools/verify.sh
 ```
 
-## Architecture / gotchas
+## Architecture / behavior
 
 - **paho v1 and v2 must both work.** `select_api` picks the variant from the protocol, and
   `has_v2_api()` gates the v2 paths. The v1-only CI job lints with `continue-on-error` because
@@ -88,14 +88,14 @@ flake8 ./bin/user/mqttcommon.py ./bin/user/tests
 - Keep the module free of new weewx imports at module scope; the consumers' unit suites import it
   without a WeeWX install.
 
-## Testing conventions
+## Testing conventions and quirks
 
 - The `Logger` message format and the entry dicts are part of the consumers' tests. Changing a
   rendered line or an entry key means the copies' tests change too — same round.
 - The tests are vendored along with the module (`common-files.txt`), so a test change is a
   cross-repo change: run the suite here, then `commonrepos.sh` into each consumer.
 
-## Versioning (MQTTCOMMON_API)
+## Versioning and release (MQTTCOMMON_API)
 
 There is no `VERSION` here; consumers bump their own, in two files each.
 

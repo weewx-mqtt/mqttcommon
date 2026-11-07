@@ -34,8 +34,11 @@ extension can overwrite a newer module. It has not been bumped yet — nothing h
 
 ```bash
 source .devenv
+export PYTHONPATH="$WEEWX_PYTHONPATH"
 pytest bin/user/tests/unit
 ```
+
+`AGENTS.md` has the full commands, the vendoring contract, and the CI details.
 
 The module imports weewx lazily (inside `Logger._configure` and `log_environment`), so it stays
 importable without a WeeWX install, but pylint needs weewx importable to resolve those imports.
