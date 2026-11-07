@@ -3,21 +3,7 @@
 Canonical home of the paho MQTT client code shared by the weewx-mqtt extensions. The extensions
 vendor copies of `bin/user/mqttcommon.py`; this repository is the only place that code is edited.
 
-## Layout
-
-- `bin/user/mqttcommon.py` — api variant selection (`select_api`, `parse_protocol`), client
-  creation, connect, credentials, TLS configuration, reconnect delays, callback adaptation, paho
-  log levels, the `Logger`/`LoggerThread` logging skeleton (the log queue and its drain loop), and
-  the `MessageThrottle` log-throttling runtime. Imports weewx lazily, inside `Logger._configure`
-  and `log_environment`.
-- `bin/user/tests/unit/test_mqttcommon.py` — stubbed-paho unit tests. Also vendored, so changes
-  here have to be copied out like the module.
-- `common-files.txt` — the manifest of files consumers copy in, one path per line, read by
-  development-tools at the ref the consumer declares. **A new shared file that is not listed here
-  never reaches a consumer.**
-- `README.md` — the user-facing statement of the contract. Keep it and this file in step.
-
-## The vendoring contract
+## Role & boundaries (the vendoring contract)
 
 - `bin/user/mqttcommon.py` and `bin/user/tests/unit/test_mqttcommon.py` must stay
   **byte-identical** in this repository and in publish, subscribe and replicate.
@@ -39,7 +25,79 @@ vendor copies of `bin/user/mqttcommon.py`; this repository is the only place tha
 - Consumers are independent installs, which is why the copies exist at all: an extension installs
   from its repository archive and writes `bin/user/mqttcommon.py`.
 
-## MQTTCOMMON_API
+## Layout
+
+- `bin/user/mqttcommon.py` — api variant selection (`select_api`, `parse_protocol`), client
+  creation, connect, credentials, TLS configuration, reconnect delays, callback adaptation, paho
+  log levels, the `Logger`/`LoggerThread` logging skeleton (the log queue and its drain loop), and
+  the `MessageThrottle` log-throttling runtime. Imports weewx lazily, inside `Logger._configure`
+  and `log_environment`.
+- `bin/user/tests/unit/test_mqttcommon.py` — stubbed-paho unit tests. Also vendored, so changes
+  here have to be copied out like the module.
+- `common-files.txt` — the manifest of files consumers copy in, one path per line, read by
+  development-tools at the ref the consumer declares. **A new shared file that is not listed here
+  never reaches a consumer.**
+- `README.md` — the user-facing statement of the contract. This repository is the one exception
+  to the docs-first README policy of the consumers: it has no `docs/` site, so its README lives at
+  the root. Keep it and this file in step.
+
+## Environment
+
+Run everything from the repo root:
+
+```bash
+source .devenv
+export PYTHONPATH="$WEEWX_PYTHONPATH"   # == bin, or bin:../weewx/src
+```
+
+- `.devenv` defines `WEEWX_MODULE_NAME`, `WEEWX_PYENV_VERSION`, `WEEWX_TOOL_PATH`,
+  `WEEWX_LINT_PATHS`, `WEEWX_TEST_SUITES`, and puts the helper scripts on `PATH`. It does not set
+  `WEEWX_COMMON_REPOS` — this repository is the shared source, not a consumer.
+- WeeWX comes from PyPI when it is installed, otherwise from the sibling checkout `../weewx/src`
+  (`.devenv` detects which).
+- The full pre-commit gate is `~/weewx_dev/weewx-extensions/development-tools/tools/verify.sh`
+  (environment, lint, actionlint, shared-config and common-repo checks, all test suites).
+
+## Commands
+
+```bash
+source .devenv
+export PYTHONPATH="$WEEWX_PYTHONPATH"
+
+# All unit tests (95, well under a second). No broker or network: paho is stubbed.
+pytest bin/user/tests/unit
+
+# pylint needs weewx importable even though the module imports it lazily.
+pylint ./bin/user/mqttcommon.py -r n
+pylint ./bin/user/tests -r n --rcfile .pylintrc-tests
+
+# flake8, max-line-length 145 (config: .flake8)
+flake8 ./bin/user/mqttcommon.py ./bin/user/tests
+
+# The full pre-commit gate: environment, lint, actionlint, shared-config and
+# common-repo checks, all suites.
+~/weewx_dev/weewx-extensions/development-tools/tools/verify.sh
+```
+
+## Architecture / gotchas
+
+- **paho v1 and v2 must both work.** `select_api` picks the variant from the protocol, and
+  `has_v2_api()` gates the v2 paths. The v1-only CI job lints with `continue-on-error` because
+  pylint reports false E1101/E1123 against 1.6.1.
+- **Python 3.9 syntax** — the CI matrix starts at 3.9.13.
+- Keep the module free of new weewx imports at module scope; the consumers' unit suites import it
+  without a WeeWX install.
+
+## Testing conventions
+
+- The `Logger` message format and the entry dicts are part of the consumers' tests. Changing a
+  rendered line or an entry key means the copies' tests change too — same round.
+- The tests are vendored along with the module (`common-files.txt`), so a test change is a
+  cross-repo change: run the suite here, then `commonrepos.sh` into each consumer.
+
+## Versioning (MQTTCOMMON_API)
+
+There is no `VERSION` here; consumers bump their own, in two files each.
 
 `MQTTCOMMON_API = (1, 0)` in `mqttcommon.py` is the station-level guard: extensions are installed
 independently, so an older one can overwrite a newer module. Each consumer checks it at import
@@ -58,41 +116,14 @@ now use) — not for wording or internal fixes. One bump is four edits in the sa
 
 It starts at `(1, 0)` and has not been bumped — nothing has been released.
 
-## Commands
-
-```bash
-source .devenv
-export PYTHONPATH="$WEEWX_PYTHONPATH"   # == bin, or bin:../weewx/src
-
-# All unit tests (95, well under a second). No broker or network: paho is stubbed.
-pytest bin/user/tests/unit
-
-# pylint needs weewx importable even though the module imports it lazily.
-pylint ./bin/user/mqttcommon.py -r n
-pylint ./bin/user/tests -r n --rcfile .pylintrc-tests
-
-# flake8, max-line-length 145 (config: .flake8)
-flake8 ./bin/user/mqttcommon.py ./bin/user/tests
-
-# The full pre-commit gate: environment, lint, actionlint, shared-config and
-# common-repo checks, all suites.
-~/weewx_dev/weewx-extensions/development-tools/tools/verify.sh
-```
-
-## Gotchas
-
-- **paho v1 and v2 must both work.** `select_api` picks the variant from the protocol, and
-  `has_v2_api()` gates the v2 paths. The v1-only CI job lints with `continue-on-error` because
-  pylint reports false E1101/E1123 against 1.6.1.
-- **Python 3.9 syntax** — the CI matrix starts at 3.9.13.
-- Keep the module free of new weewx imports at module scope; the consumers' unit suites import it
-  without a WeeWX install.
-- The `Logger` message format and the entry dicts are part of the consumers' tests. Changing a
-  rendered line or an entry key means the copies' tests change too — same round.
-- There is no `VERSION` here; consumers bump their own, in two files each.
-
 ## CI
 
 `.github/workflows/analyze-test.yml` runs locally-runnable equivalents of `verify.sh`: the Python
 3.9.13–3.14 matrix (pylint, flake8, unit tests, coverage) plus a `paho-mqtt==1.6.1` job.
 `versioning.yml` is the reusable tagger called on release.
+
+## Cross-repo workflow
+
+Single changes stay in this repository. Cross-repo work (a shared change, rename, wording pass)
+starts in the workspace root (`weewx-mqtt`): see the workspace `AGENTS.md` for the order of a
+cross-repo change and `./status-all.sh` to see every repository's state at once.
