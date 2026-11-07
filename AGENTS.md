@@ -122,6 +122,12 @@ It starts at `(1, 0)` and has not been bumped — nothing has been released.
 3.9.13–3.14 matrix (pylint, flake8, unit tests, coverage) plus a `paho-mqtt==1.6.1` job.
 `versioning.yml` is the reusable tagger called on release.
 
+## Commits
+
+Never commit, push, tag or release unless explicitly asked: stage the changes and stop. A
+request to make a change is not permission to commit it, and "do it" does not include
+committing. Propose the commit message and wait for the go-ahead.
+
 ## Cross-repo workflow
 
 Single changes stay in this repository. Cross-repo work (a shared change, rename, wording pass)
