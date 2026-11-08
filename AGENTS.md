@@ -64,7 +64,7 @@ export PYTHONPATH="$WEEWX_PYTHONPATH"   # == bin, or bin:../weewx/src
 source .devenv
 export PYTHONPATH="$WEEWX_PYTHONPATH"
 
-# All unit tests (95, well under a second). No broker or network: paho is stubbed.
+# All unit tests. No broker or network: paho is stubbed.
 pytest bin/user/tests/unit
 
 # pylint needs weewx importable even though the module imports it lazily.
