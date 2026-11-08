@@ -118,9 +118,17 @@ It starts at `(1, 0)` and has not been bumped — nothing has been released.
 
 ## CI
 
-`.github/workflows/analyze-test.yml` runs locally-runnable equivalents of `verify.sh`: the Python
-3.9.13–3.14 matrix (pylint, flake8, unit tests, coverage) plus a `paho-mqtt==1.6.1` job.
-`versioning.yml` is the reusable tagger called on release.
+`analyze-test.yml` is local rather than a call to the development-tools reusable workflow because
+`mqttcommon` is not an installable extension. It needs a single WeeWX install only so pylint can
+resolve the lazily imported names, it runs the unit suite only (no broker, no func/integ/e2e), and
+it has no `common-repos` to sync — it is the source. The consumers' wrapper is extension-shaped:
+it would add broker setup, the absent suites and the WeeWX-version matrix, and lose PR coverage.
+
+The workflow stays the locally-runnable equivalent of `verify.sh` so the two cannot drift: the
+Python 3.9.13–3.14 matrix the extensions themselves support (pylint, flake8, unit tests,
+coverage), plus a `paho-mqtt==1.6.1` job (report-only lint; see Architecture / behavior), because
+both paho generations must keep working in the consumers. Releases are tagged by the shared
+`versioning.yml@v6` the consumers use.
 
 ## Commits
 

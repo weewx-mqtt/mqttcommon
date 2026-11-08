@@ -1,12 +1,10 @@
-name: Keep versions up to date
+name: Keep the versions up-to-date
 
 on:
-  workflow_call:
+  release:
+    types:
+      - published
 
 jobs:
   version:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Actions-R-Us/actions-tagger@v2
-        with:
-          publish_latest_tag: true
+    uses: weewx-extensions/development-tools/.github/workflows/versioning.yml@v6
