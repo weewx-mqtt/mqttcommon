@@ -94,6 +94,8 @@ flake8 ./bin/user/mqttcommon.py ./bin/user/tests
   rendered line or an entry key means the copies' tests change too — same round.
 - The tests are vendored along with the module (`common-files.txt`), so a test change is a
   cross-repo change: run the suite here, then `commonrepos.sh` into each consumer.
+- Tests run under pytest or directly via `unittest.main()`. Because this file is vendored, its
+  runner is the one the consumers inherit; do not add a `helpers.run_tests()` dependency.
 
 ## Versioning and release (MQTTCOMMON_API)
 
