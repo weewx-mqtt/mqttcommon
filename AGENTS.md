@@ -28,10 +28,10 @@ vendor copies of `bin/user/mqttcommon.py`; this repository is the only place tha
 ## Layout
 
 - `bin/user/mqttcommon.py` — api variant selection (`select_api`, `parse_protocol`), client
-  creation, connect, credentials, TLS configuration, reconnect delays, callback adaptation, paho
-  log levels, the `Logger`/`LoggerThread` logging skeleton (the log queue and its drain loop), and
-  the `MessageThrottle` log-throttling runtime. Imports weewx lazily, inside `Logger._configure`
-  and `log_environment`.
+  creation, connect and asynchronous connect, credentials, TLS configuration, reconnect delays,
+  callback adaptation, paho log levels, the `Logger`/`LoggerThread` logging skeleton (the log
+  queue and its drain loop), and the `MessageThrottle` log-throttling runtime. Imports weewx
+  lazily, inside `Logger._configure` and `log_environment`.
 - `bin/user/tests/unit/test_mqttcommon.py` — stubbed-paho unit tests. Also vendored, so changes
   here have to be copied out like the module.
 - `common-files.txt` — the manifest of files consumers copy in, one path per line, read by
@@ -101,12 +101,12 @@ flake8 ./bin/user/mqttcommon.py ./bin/user/tests
 
 There is no `VERSION` here; consumers bump their own, in two files each.
 
-`MQTTCOMMON_API = (1, 0)` in `mqttcommon.py` is the station-level guard: extensions are installed
+`MQTTCOMMON_API = (1, 1)` in `mqttcommon.py` is the station-level guard: extensions are installed
 independently, so an older one can overwrite a newer module. Each consumer checks it at import
 time and raises when its copy is too old:
 
 ```python
-if getattr(mqttcommon, 'MQTTCOMMON_API', (0, 0)) < (1, 0):
+if getattr(mqttcommon, 'MQTTCOMMON_API', (0, 0)) < (1, 1):
 ```
 
 Bump it only when a change requires consumers to have a newer copy (a new call or behaviour they
@@ -116,7 +116,8 @@ now use) — not for wording or internal fixes. One bump is four edits in the sa
 2. the assert in `bin/user/tests/unit/test_mqttcommon.py`;
 3. the import-time check in `mqttpublish.py`, `mqttsubscribe.py`, `mqttreplicate.py`.
 
-It starts at `(1, 0)` and has not been bumped — nothing has been released.
+It was `(1, 0)` until `connect_async` was added; consumers now require `(1, 1)` for the shared
+connect surface.
 
 ## CI
 
