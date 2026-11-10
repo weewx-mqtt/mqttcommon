@@ -28,7 +28,8 @@ fails the build.
 
 Consumers verify `MQTTCOMMON_API` at import time and fail loudly when their copy is older than they
 require. It is the station-level guard: extensions are installed independently, so an older
-extension can overwrite a newer module. It has not been bumped yet — nothing has been released.
+extension can overwrite a newer module. It is currently `(1, 1)`; the bump from `(1, 0)` added
+`connect_async`, which the publish extension uses for its initial connection.
 
 ## Development
 
