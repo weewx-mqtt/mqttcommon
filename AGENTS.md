@@ -128,7 +128,7 @@ it has no `common-repos` to sync — it is the source. The consumers' wrapper is
 it would add broker setup, the absent suites and the WeeWX-version matrix, and lose PR coverage.
 
 The workflow stays the locally-runnable equivalent of `verify.sh` so the two cannot drift: the
-Python 3.9.13–3.14 matrix the extensions themselves support (pylint, flake8, unit tests,
+Python 3.9.13–3.15 matrix the extensions themselves support (pylint, flake8, unit tests,
 coverage), plus a `paho-mqtt==1.6.1` job (report-only lint; see Architecture / behavior), because
 both paho generations must keep working in the consumers. Releases are tagged by the shared
 `versioning.yml@v6` the consumers use.
