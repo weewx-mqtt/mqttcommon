@@ -55,7 +55,7 @@ export PYTHONPATH="$WEEWX_PYTHONPATH"   # == bin, or bin:../weewx/src
   `WEEWX_COMMON_REPOS` — this repository is the shared source, not a consumer.
 - WeeWX comes from PyPI when it is installed, otherwise from the sibling checkout `../weewx/src`
   (`.devenv` detects which).
-- The full pre-commit gate is `~/weewx_dev/weewx-extensions/development-tools/tools/verify.sh`
+- The full pre-commit gate is `~/weewx_code/weewx-extensions/development-tools/tools/verify.sh`
   (environment, lint, actionlint, shared-config and common-repo checks, all test suites).
 
 ## Commands
@@ -76,7 +76,7 @@ flake8 ./bin/user/mqttcommon.py ./bin/user/tests
 
 # The full pre-commit gate: environment, lint, actionlint, shared-config and
 # common-repo checks, all suites.
-~/weewx_dev/weewx-extensions/development-tools/tools/verify.sh
+~/weewx_code/weewx-extensions/development-tools/tools/verify.sh
 ```
 
 ## Architecture / behavior
