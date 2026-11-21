@@ -50,11 +50,12 @@ source .devenv
 export PYTHONPATH="$WEEWX_PYTHONPATH"   # == bin, or bin:../weewx/src
 ```
 
-- `.devenv` defines `WEEWX_MODULE_NAME`, `WEEWX_PYENV_VERSION`, `WEEWX_TOOL_PATH`,
-  `WEEWX_LINT_PATHS`, `WEEWX_TEST_SUITES`, and puts the helper scripts on `PATH`. It does not set
+- `.devenv` sources the shared `tools/devenv.sh`, which sets `WEEWX_MODULE_NAME`, the
+  development default (`WEEWX_PYENV_VERSION` from `supported-pythons`, exported as `PYENV_VERSION`),
+  `WEEWX_TOOL_PATH`, `WEEWX_PYTHONPATH`, and puts the helper scripts on `PATH`. It does not set
   `WEEWX_COMMON_REPOS` — this repository is the shared source, not a consumer.
 - WeeWX comes from PyPI when it is installed, otherwise from the sibling checkout `../weewx/src`
-  (`.devenv` detects which).
+  (the shared `devenv.sh` detects which).
 - The full pre-commit gate is `~/weewx_code/weewx-extensions/development-tools/tools/verify.sh`
   (environment, lint, actionlint, shared-config and common-repo checks, all test suites).
 
@@ -84,7 +85,8 @@ flake8 ./bin/user/mqttcommon.py ./bin/user/tests
 - **paho v1 and v2 must both work.** `select_api` picks the variant from the protocol, and
   `has_v2_api()` gates the v2 paths. The v1-only CI job lints with `continue-on-error` because
   pylint reports false E1101/E1123 against 1.6.1.
-- **Python 3.9 syntax** — the CI matrix starts at 3.9.13.
+- **Python 3.9 syntax** — the supported versions run from 3.9.13, the development default, to
+  3.15.2; code must stay compatible with Python 3.9 syntax.
 - Keep the module free of new weewx imports at module scope; the consumers' unit suites import it
   without a WeeWX install.
 
@@ -128,7 +130,7 @@ it has no `common-repos` to sync — it is the source. The consumers' wrapper is
 it would add broker setup, the absent suites and the WeeWX-version matrix, and lose PR coverage.
 
 The workflow stays the locally-runnable equivalent of `verify.sh` so the two cannot drift: the
-Python 3.9.13–3.15 matrix the extensions themselves support (pylint, flake8, unit tests,
+Python 3.9.13–3.15.2 matrix the extensions themselves support (pylint, flake8, unit tests,
 coverage), plus a `paho-mqtt==1.6.1` job (report-only lint; see Architecture / behavior), because
 both paho generations must keep working in the consumers. Releases are tagged by the shared
 `versioning.yml@v6` the consumers use.
