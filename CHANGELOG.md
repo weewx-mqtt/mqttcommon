@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3]
+
+- Add shared `log_direct` and `wait_for_inflight` helpers; `MQTTCOMMON_API` moves from `(1, 2)` to `(1, 3)`.
+
 ## [1.2]
 
 - Add the shared publish in-flight tracker; the `MQTTCOMMON_API` guard moves from `(1, 1)` to `(1, 2)`.
